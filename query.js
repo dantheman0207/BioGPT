@@ -1,17 +1,22 @@
-const readline = require('readline').createInterface({
-    input: process.stdin,
-    output: process.stdout,
-})
-// turn the readline function constant into a function that returns a promise
-const readlinePromisified = (question) => {
-    return new Promise((resolve) => {
-        readline.question(question, (answer) => {
-            resolve(answer)
-        })
+let Stop = false;
+const readline = require('readline')
+
+function getPromisifiedReadline() {
+    const readlineInterface = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
     })
+    return (question) => {
+        return new Promise((resolve) => {
+            readlineInterface.question(question, (answer) => {
+                resolve(answer)
+            })
+        })
+    }
 }
 
 async function query(data) {
+    // console.log('Querying...')
 	const response = await fetch(
 		"https://api-inference.huggingface.co/models/microsoft/BioGPT-Large-PubMedQA",
 		{
@@ -21,28 +26,44 @@ async function query(data) {
 		}
 	);
     if (!response.ok) throw new Error("HTTP error, status = " + response.status);
-    console.log('Compute type:', response.headers.get("x-compute-type"));
+    // console.log('Compute type:', response.headers.get("x-compute-type"));
 	const result = await response.json();
 	return result;
 }
 
-async function main() {
-    let prevOutput = ''
-    while (true) {
-        await readlinePromisified(`What's your question? (hit enter to continue previous query):\n`)
-            .then(input => {
-                if (input === '') {
-                    console.log(prevOutput, '\n')
-                    input = prevOutput
-                }
-                return query({"inputs": input})
-            }).then((response) => {
-                prevOutput = response[0].generated_text
-                console.log(JSON.stringify(prevOutput))
-            }).catch((error) => {
-                console.error('query error:', error)
-            });
+async function fetchNextResponse(input = '') {
+    if (Stop) {
+        console.log('Stopping...')
+        Stop = false
+        return
     }
+    query({"inputs": input})
+        .then((response) => {
+            const output = response[0].generated_text
+            const newOutput = output.replace(input, '')
+            // log without creating new line
+            process.stdout.write(newOutput)
+            // Sleep 200 ms then recurse
+            setTimeout(() => {
+                fetchNextResponse(output)
+            }, 200)
+        }).catch((error) => {
+            console.error('query error:', error)
+        });
+}
+
+async function main() {
+    return getPromisifiedReadline()(`What's your question?\n`)
+        .then((input) => {
+            fetchNextResponse(input)
+        });
 }
 
 main()
+
+// catch ctrl+c event and rerun main()
+process.on('SIGINT', () => {
+    console.log("Caught interrupt signal");
+    Stop = true
+    main()
+});
