@@ -46,9 +46,10 @@ async function fetchNextResponse(input = '') {
             // Sleep 200 ms then recurse
             setTimeout(() => {
                 fetchNextResponse(output)
-            }, 200)
+            }, 800)
         }).catch((error) => {
             console.error('query error:', error)
+            restart(false)
         });
 }
 
@@ -59,11 +60,16 @@ async function main() {
         });
 }
 
+function restart(Stopping = true) {
+    // console.log("Caught interrupt signal");
+    Stop = Stopping
+    // wait one second then rerun main()
+    setTimeout(() => {
+        main()
+    }, 1500)
+}
+
 main()
 
 // catch ctrl+c event and rerun main()
-process.on('SIGINT', () => {
-    console.log("Caught interrupt signal");
-    Stop = true
-    main()
-});
+process.on('SIGINT', restart);
