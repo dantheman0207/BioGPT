@@ -1,5 +1,21 @@
 {
-  "dependencies": {
-    "readline-promise": "^1.0.5"
-  }
+  "name": "biogpt",
+  "description": "allow playing with MS BioGPT model",
+  "version": "1.0.0",
+  "main": "query.js",
+  "devDependencies": {},
+  "scripts": {
+    "start": "node query.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dantheman0207/BioGPT.git"
+  },
+  "author": "Daniel Ransom",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/dantheman0207/BioGPT/issues"
+  },
+  "homepage": "https://github.com/dantheman0207/BioGPT#readme"
 }
