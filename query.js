@@ -65,9 +65,7 @@ function restart(Stopping = true) {
     if (Stop === Stopping) return // debounce
     Stop = Stopping
     // wait one second then rerun main()
-    setTimeout(() => {
-        main()
-    }, 1500)
+    setTimeout(main, 1500)
 }
 
 main()
