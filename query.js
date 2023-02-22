@@ -62,7 +62,7 @@ async function main() {
 
 function restart(Stopping = true) {
     // console.log("Caught interrupt signal");
-    if (Stop === Stopping) return
+    if (Stop === Stopping) return // debounce
     Stop = Stopping
     // wait one second then rerun main()
     setTimeout(() => {
